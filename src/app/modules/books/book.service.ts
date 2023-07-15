@@ -10,10 +10,22 @@ import { andConditionSearchFields } from "./book.constants";
 import { IBook, IBookFilters } from "./books.interface";
 import Book from "./books.model";
 import { SortOrder, Types } from "mongoose";
+import Wishlist from "./wishlist.model";
 
 const createBook = async (BookData: IBook): Promise<IBook | null> => {
   const newBook = await Book.create(BookData);
   return newBook;
+};
+const createWishList = async (BookData: IBook): Promise<IBook | null> => {
+  const { title, author } = BookData;
+  const existingWishlist = await Wishlist.findOne({ title, author });
+
+  if (existingWishlist) {
+    throw new ApiError(409, "Already exist in wishlist");
+  }
+
+  const newWishlist = await Wishlist.create(BookData);
+  return newWishlist;
 };
 
 const postComment = async (id: string, reviews: string) => {
@@ -21,7 +33,6 @@ const postComment = async (id: string, reviews: string) => {
     { _id: new Types.ObjectId(id) },
     { $push: { reviews: reviews } }
   );
-  console.log(result);
 
   if (result.modifiedCount !== 1) {
     console.error("Product not found or comment not added");
@@ -32,12 +43,17 @@ const postComment = async (id: string, reviews: string) => {
 
 const getComment = async (id: string) => {
   const result = await Book.findOne({ _id: new Types.ObjectId(id) });
-  console.log(result, "Get comment");
+
   return result;
 };
 
 const getLatestBooks = async (): Promise<IBook[]> => {
   const books = await Book.find().sort({ publicationDate: -1 }).limit(10);
+
+  return books;
+};
+const getWishList = async (): Promise<IBook[]> => {
+  const books = await Book.find();
 
   return books;
 };
@@ -115,6 +131,16 @@ const deleteBook = async (id: string): Promise<IBook | null> => {
 
   return result;
 };
+const removeFromWishList = async (id: string): Promise<IBook | null> => {
+  const result = await Wishlist.findByIdAndDelete(id);
+
+  return result;
+};
+const getWishlistBook = async (): Promise<IBook[]> => {
+  const books = await Wishlist.find();
+
+  return books;
+};
 export const BookService = {
   getLatestBooks,
   getAllBooks,
@@ -124,4 +150,8 @@ export const BookService = {
   getComment,
   updateBook,
   deleteBook,
+  createWishList,
+  getWishList,
+  removeFromWishList,
+  getWishlistBook,
 };

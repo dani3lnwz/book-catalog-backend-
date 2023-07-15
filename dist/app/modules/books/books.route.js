@@ -1,0 +1,22 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BookRoutes = void 0;
+const express_1 = __importDefault(require("express"));
+const books_controller_1 = require("./books.controller");
+const router = express_1.default.Router();
+router.post("/", books_controller_1.BookController.createBook);
+router.post("/wishlist", books_controller_1.BookController.createWishList);
+router.get("/latest-book", books_controller_1.BookController.getLatestBooks);
+router.get("/wishlist", books_controller_1.BookController.getWishlistBook);
+router.get("/", books_controller_1.BookController.getAllBooks);
+router.get("/wishlist", books_controller_1.BookController.getWishList);
+router.get("/:id", books_controller_1.BookController.getSingleBook);
+router.post("/comment/:id", books_controller_1.BookController.postComment);
+router.get("/comment/:id", books_controller_1.BookController.getComment);
+router.delete("/:id", books_controller_1.BookController.deleteBook);
+router.delete("/wishlist/:id", books_controller_1.BookController.removeFromWishList);
+router.patch("/:id", books_controller_1.BookController.updateBook);
+exports.BookRoutes = router;

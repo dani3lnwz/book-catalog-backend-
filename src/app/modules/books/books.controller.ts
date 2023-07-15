@@ -6,6 +6,8 @@ import { BookService } from "./book.service";
 import pick from "../../../shared/pick";
 import { bookFilterableFields } from "./book.constants";
 import paiginationFields from "../../../constant/pagination";
+import Wishlist from "./wishlist.model";
+import ApiError from "../../../errors/ApiError";
 
 const createBook: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
@@ -20,11 +22,24 @@ const createBook: RequestHandler = catchAsync(
     });
   }
 );
+const createWishList: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {
+    const { ...BookData } = req.body;
+    const result = await BookService.createWishList(BookData);
+
+    sendResponse<IBook>(res, {
+      statusCode: 200,
+      success: true,
+      message: "Added in Wishlist",
+      data: result,
+    });
+  }
+);
+
 const postComment: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const bookId = req.params.id;
     const reviews = req.body.reviews;
-    console.log(bookId, "BookId");
 
     const result = await BookService.postComment(bookId, reviews);
 
@@ -36,6 +51,7 @@ const postComment: RequestHandler = catchAsync(
     });
   }
 );
+
 const getComment = catchAsync(async (req: Request, res: Response) => {
   const bookId = req.params.id;
 
@@ -59,7 +75,7 @@ const getAllBooks = catchAsync(async (req: Request, res: Response) => {
   const filters = pick(req.query, bookFilterableFields);
   const paginationOptions = pick(req.query, paiginationFields);
   const result = await BookService.getAllBooks(filters, paginationOptions);
-  console.log(result);
+
   sendResponse<IBook[]>(res, {
     statusCode: 200,
     success: true,
@@ -67,14 +83,6 @@ const getAllBooks = catchAsync(async (req: Request, res: Response) => {
     data: result.data,
   });
 });
-// const getAllBooks = catchAsync(async (req: Request, res: Response) => {
-//   const result = await BookService.getAllBooks();
-//   sendResponse<IBook[]>(res, {
-//     statusCode: 200,
-//     success: true,
-//     data: result,
-//   });
-// });
 
 const getSingleBook = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
@@ -86,11 +94,18 @@ const getSingleBook = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getWishList = catchAsync(async (req: Request, res: Response) => {
+  const result = await BookService.getWishList();
+  sendResponse<IBook[]>(res, {
+    statusCode: 200,
+    success: true,
+    data: result,
+  });
+});
 const updateBook = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
   const updatedData = req.body;
-  console.log(id, "bookid");
-  console.log(updatedData, "updatedData");
+
   const result = await BookService.updateBook(id, updatedData);
   sendResponse<IBook>(res, {
     statusCode: 200,
@@ -109,6 +124,26 @@ const deleteBook = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const removeFromWishList: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {
+    const wishlistId = req.params.id;
+    const result = await BookService.removeFromWishList(wishlistId);
+    sendResponse<IBook>(res, {
+      statusCode: 200,
+      success: true,
+      message: "Book deleted successfully",
+      data: result,
+    });
+  }
+);
+const getWishlistBook = catchAsync(async (req: Request, res: Response) => {
+  const result = await BookService.getWishlistBook();
+  sendResponse<IBook[]>(res, {
+    statusCode: 200,
+    success: true,
+    data: result,
+  });
+});
 export const BookController = {
   createBook,
   getLatestBooks,
@@ -118,4 +153,8 @@ export const BookController = {
   getComment,
   updateBook,
   deleteBook,
+  createWishList,
+  getWishList,
+  removeFromWishList,
+  getWishlistBook,
 };

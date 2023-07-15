@@ -1,9 +1,6 @@
 import { Schema, model } from "mongoose";
 import { IBook } from "./books.interface";
 const bookSchema = new Schema<IBook>({
-  userEmail: {
-    type: String,
-  },
   title: {
     type: String,
     required: true,
@@ -27,6 +24,6 @@ const bookSchema = new Schema<IBook>({
   ],
 });
 
-const Book = model<IBook>("Book", bookSchema);
+const Wishlist = model<IBook>("Wishlist", bookSchema);
 
-export default Book;
+export default Wishlist;
