@@ -11,6 +11,8 @@ import { IBook, IBookFilters } from "./books.interface";
 import Book from "./books.model";
 import { SortOrder, Types } from "mongoose";
 import Wishlist from "./wishlist.model";
+import Read from "./readinglist.model";
+import { IReading } from "./interface";
 
 const createBook = async (BookData: IBook): Promise<IBook | null> => {
   const newBook = await Book.create(BookData);
@@ -27,7 +29,17 @@ const createWishList = async (BookData: IBook): Promise<IBook | null> => {
   const newWishlist = await Wishlist.create(BookData);
   return newWishlist;
 };
+const createReadingList = async (BookData: IBook): Promise<IReading | null> => {
+  const { title, author } = BookData;
+  const existingWishlist = await Read.findOne({ title, author });
 
+  if (existingWishlist) {
+    throw new ApiError(409, "Already exist in Reading List");
+  }
+
+  const newWishlist = await Read.create(BookData);
+  return newWishlist;
+};
 const postComment = async (id: string, reviews: string) => {
   const result = await Book.updateOne(
     { _id: new Types.ObjectId(id) },
@@ -55,6 +67,10 @@ const getLatestBooks = async (): Promise<IBook[]> => {
 const getWishList = async (): Promise<IBook[]> => {
   const books = await Book.find();
 
+  return books;
+};
+const getReadingList = async (): Promise<IBook[]> => {
+  const books = await Read.find();
   return books;
 };
 const getAllBooks = async (
@@ -136,6 +152,11 @@ const removeFromWishList = async (id: string): Promise<IBook | null> => {
 
   return result;
 };
+const removeFromReadingList = async (id: string): Promise<IBook | null> => {
+  const result = await Read.findByIdAndDelete(id);
+
+  return result;
+};
 const getWishlistBook = async (): Promise<IBook[]> => {
   const books = await Wishlist.find();
 
@@ -154,4 +175,7 @@ export const BookService = {
   getWishList,
   removeFromWishList,
   getWishlistBook,
+  createReadingList,
+  getReadingList,
+  removeFromReadingList,
 };

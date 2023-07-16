@@ -6,8 +6,7 @@ import { BookService } from "./book.service";
 import pick from "../../../shared/pick";
 import { bookFilterableFields } from "./book.constants";
 import paiginationFields from "../../../constant/pagination";
-import Wishlist from "./wishlist.model";
-import ApiError from "../../../errors/ApiError";
+import { IReading } from "./interface";
 
 const createBook: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
@@ -35,7 +34,19 @@ const createWishList: RequestHandler = catchAsync(
     });
   }
 );
+const createReadingList: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {
+    const { ...BookData } = req.body;
+    const result = await BookService.createReadingList(BookData);
 
+    sendResponse<IReading>(res, {
+      statusCode: 200,
+      success: true,
+      message: "Created Reading list",
+      data: result,
+    });
+  }
+);
 const postComment: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const bookId = req.params.id;
@@ -102,6 +113,14 @@ const getWishList = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getReadingList = catchAsync(async (req: Request, res: Response) => {
+  const result = await BookService.getReadingList();
+  sendResponse<IBook[]>(res, {
+    statusCode: 200,
+    success: true,
+    data: result,
+  });
+});
 const updateBook = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
   const updatedData = req.body;
@@ -136,6 +155,18 @@ const removeFromWishList: RequestHandler = catchAsync(
     });
   }
 );
+const removeFromReadingList: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {
+    const wishlistId = req.params.id;
+    const result = await BookService.removeFromReadingList(wishlistId);
+    sendResponse<IReading>(res, {
+      statusCode: 200,
+      success: true,
+      message: "Deleted successfully",
+      data: result,
+    });
+  }
+);
 const getWishlistBook = catchAsync(async (req: Request, res: Response) => {
   const result = await BookService.getWishlistBook();
   sendResponse<IBook[]>(res, {
@@ -157,4 +188,7 @@ export const BookController = {
   getWishList,
   removeFromWishList,
   getWishlistBook,
+  createReadingList,
+  getReadingList,
+  removeFromReadingList,
 };
